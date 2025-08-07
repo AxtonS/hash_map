@@ -9,20 +9,20 @@ class LinkedList
   end
 
   def append(key:, value:)
-    pointer = self.head
+    pointer = head
     pointer = pointer.next_node until pointer.next_node.nil?
 
     pointer.next_node = Node.new(key: key, value: value)
   end
 
   def prepend(key:, value:)
-    pointer = @head
-    @head = Node.new(key: key, value: value, next_node: pointer)
+    pointer = head
+    self.head = Node.new(key: key, value: value, next_node: pointer)
   end
 
   def size
     counter = 1
-    pointer = @head
+    pointer = head
     until pointer.next_node.nil?
       pointer = pointer.next_node
       counter += 1
@@ -31,13 +31,13 @@ class LinkedList
   end
 
   def tail
-    pointer = @head
+    pointer = head
     pointer = pointer.next_node until pointer.next_node.nil?
 
     pointer
   end
 
-  def index(num)
+  def index(num:)
     counter = 0
     pointer = @head
     while counter < num
@@ -50,12 +50,12 @@ class LinkedList
   end
 
   def pop
-    pointer = @head
+    pointer = head
     pointer = pointer.next_node until pointer.next_node.next_node.nil?
     pointer.next_node = nil
   end
 
-  def contains?(value)
+  def contains?(value:)
     pointer = @head
     until pointer.next_node.nil?
       return true if pointer.value == value
@@ -67,10 +67,10 @@ class LinkedList
     pointer.value == value
   end
 
-  def find(value)
+  def find(value:)
     index = 0
     pointer = @head
-    return false if contains?(value) == false
+    return false if contains?(value: value) == false
 
     until pointer.value == value
       pointer = pointer.next_node
@@ -90,26 +90,26 @@ class LinkedList
     string
   end
 
-  def insert_at(value:, index:)
+  def insert_at(key:, value:, index:)
     if index > size - 1
-      append(value)
+      append(key: key, value: value)
       nil
     elsif index < 1
-      prepend(value)
+      prepend(key: key, value: value)
 
       nil
     else
-      index(index - 1).next_node = Node.new(value: value, next_node: index(index))
+      index(index - 1).next_node = Node.new(key: key, value: value, next_node: index(index))
     end
   end
 
-  def remove_at(index)
+  def remove_at(index:)
     if index < 1
-      @head = @head.next_node
+      self.head = head.next_node
     elsif index > size - 1
-      index(size - 1).next_node = nil
+      index(num: size - 1).next_node = nil
     else
-      index(index - 1).next_node = index(index + 1)
+      index(num: index - 1).next_node = index(num: index + 1)
     end
   end
 end
