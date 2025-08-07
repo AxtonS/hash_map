@@ -1,4 +1,4 @@
-require_relative "node"
+require_relative "linked_list"
 
 # HashMap implements a basic hash map data structure with customizable load
 # factor and capacity.
@@ -24,41 +24,29 @@ class HashMap
   end
 
   def set(key:, value:)
-    index = hash(key: key) % capacity
-    raise IndexError if index.negative? || index >= buckets.length
-
+    index = safe_index(key)
     grow
-    buckets[index] = Node.new(key: key, value: value)
-  end
-
-  def grow
-    return unless length >= capacity * load_factor
-
-    self.capacity *= 2
-    new_buckets = Array.new(capacity)
-    buckets.each_with_index do |bucket, i|
-      new_buckets[i] = bucket
-    end
-    self.buckets = new_buckets
+    buckets[index] = if buckets[index].nil?
+                       Node.new(key: key, value: value)
+                     else
+                       handle_collision(buckets[index], key, value)
+                     end
   end
 
   def get(key:)
-    index = hash(key: key) % capacity
-    raise IndexError if index.negative? || index >= buckets.length
+    index = safe_index(key)
 
     buckets[index] || nil
   end
 
   def has?(key:)
-    index = hash(key: key) % capacity
-    raise IndexError if index.negative? || index >= buckets.length
+    index = safe_index(key)
 
     buckets[index] ? true : false
   end
 
   def remove(key:)
-    index = hash(key: key) % capacity
-    raise IndexError if index.negative? || index >= buckets.length
+    index = safe_index(key)
 
     return unless buckets[index]
 
@@ -85,5 +73,52 @@ class HashMap
 
   def entries
     buckets.map { |bucket| [bucket&.key, bucket&.value] }.compact
+  end
+
+  private
+
+  def safe_index(key)
+    index = hash(key: key) % capacity
+    raise IndexError if index.negative? || index >= buckets.length
+
+    index
+  end
+
+  def handle_collision(existing, key, value)
+    if existing.is_a?(Node)
+      handle_node_collision(existing, key, value)
+    elsif existing.is_a?(LinkedList)
+      handle_list_collision(existing, key, value)
+    end
+  end
+
+  def handle_node_collision(node, key, value)
+    list = LinkedList.new(key: node.key, value: node.value)
+    list.append(key: key, value: value)
+    list
+  end
+
+  def handle_list_collision(list, key, value)
+    pointer = list.head
+    while pointer
+      if pointer.key == key
+        pointer.value = value
+        return list
+      end
+      pointer = pointer.next_node
+    end
+    list.append(key: key, value: value)
+    list
+  end
+
+  def grow
+    return unless length >= capacity * load_factor
+
+    self.capacity *= 2
+    new_buckets = Array.new(capacity)
+    buckets.each_with_index do |bucket, i|
+      new_buckets[i] = bucket
+    end
+    self.buckets = new_buckets
   end
 end

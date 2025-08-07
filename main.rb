@@ -15,5 +15,5 @@ test.set(key: "kite", value: "pink")
 test.set(key: "lion", value: "golden")
 puts test.length
 puts test.capacity
-puts test.buckets
+puts test.entries
 puts (test.length / test.capacity).to_f
